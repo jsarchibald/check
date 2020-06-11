@@ -1,0 +1,10 @@
+{
+    "files": [
+        {
+            "name": "hello.c",
+            "error": "file is empty"
+        }
+    ],
+    "score": 0.0,
+    "version": "2.7.4"
+}
