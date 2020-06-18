@@ -71,7 +71,7 @@ fi
 # Start Flask mock server in background
 python3 /validate/application.py &
 
-$CHECK50_TOKEN = "foobar"
+$CHECK50_TOKEN="foobar"
 
 # Clone repo
 echo "Cloning $CHECK50_ORG/$CHECK50_REPO@$CHECK50_BRANCH..."
