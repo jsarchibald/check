@@ -68,10 +68,12 @@ if [ "$SHOW_HELP" == "1" ]; then
     usage
 fi
 
+openssl genpkey -out $CHECK50_PRIVATE_KEY -outform PEM --algorithm RSA -pkeyopt rsa_keygen_bits:2048
+chmod +r $CHECK50_PRIVATE_KEY
+openssl pkey -pubout -inform PEM -outform PEM -in $CHECK50_PRIVATE_KEY -out /validate/public.pem
+
 # Start Flask mock server in background
 python3 /validate/application.py &
-
-$CHECK50_TOKEN="foobar"
 
 # Clone repo
 echo "Cloning $CHECK50_ORG/$CHECK50_REPO@$CHECK50_BRANCH..."
