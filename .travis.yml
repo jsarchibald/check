@@ -4,7 +4,7 @@ branches:
   except: /^\d+$/
 script: |
   export TRAVIS_TAG=$(( $(git tag --list --sort=version:refname | tail -n1) + 1 ))
-  docker build . -t "$TRAVIS_REPO_SLUG:$TRAVIS_TAG"
+  docker build . -t "$TRAVIS_REPO_SLUG:$TRAVIS_TAG" --build-arg CHECK50_TOKEN
 before_deploy:
 - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 - docker tag "$TRAVIS_REPO_SLUG:$TRAVIS_TAG" "$TRAVIS_REPO_SLUG:latest"
