@@ -46,6 +46,7 @@ COPY validate/ /validate/
 
 # Generate key
 RUN [ "openssl", "genpkey", "-out", "/private.pem", "-outform", "PEM", "--algorithm", "RSA", "-pkeyopt", "rsa_keygen_bits:2048" ]
+RUN [ "chmod", "+r", "/private.pem" ]
 RUN [ "openssl", "pkey", "-pubout", "-inform", "PEM", "-outform", "PEM", "-in", "/private.pem", "-out", "/validate/public.pem" ]
 
 USER ubuntu
