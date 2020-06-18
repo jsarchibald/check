@@ -13,7 +13,7 @@ script: |
     -e CHECK50_SLUG=\"cs50/problems/2020/x/hello\" \
     -e CHECK50_COMMIT=\"e03bee664b4c310579025e494eb086b213c01626\" \
     -e CHECK50_STYLE=1 \
-    -e CHECK50_PRIVATE_KEY=\"/private.pem\", \
+    -e CHECK50_PRIVATE_KEY=\"/private.pem\" \
     -e CHECK50_CALLBACK_URL=\"http://localhost:8080/validate\" \
     \"$TRAVIS_REPO_SLUG:$TRAVIS_TAG\""
 
