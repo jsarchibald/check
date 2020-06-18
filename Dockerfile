@@ -43,4 +43,4 @@ RUN git config --global user.name bot50 && \
 ENV CHECK50_WORKERS "4"
 
 # Run build test
-ENTRYPOINT [ "/docker-entry.sh", "-o", "me50", "-r", "cs50student2", "-b", "cs50/problems/2020/x/hello", "-c", "e03bee664b4c310579025e494eb086b213c01626", "-s", "-k", "/private.pem", "-u", "http://localhost:8080/validate" ]
+CMD [ "/docker-entry.sh" ]
