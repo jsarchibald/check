@@ -71,9 +71,13 @@ fi
 # Start Flask mock server in background
 python3 /validate/application.py &
 
+if [ -n "$CHECK50_TOKEN" ]; then
+  echo "Supplied token"
+fi
+
 # Clone repo
 echo "Cloning $CHECK50_ORG/$CHECK50_REPO@$CHECK50_BRANCH..."
-git clone --branch $CHECK50_BRANCH --single-branch https://$CHECK50_TOKEN:x-oauth-basic@github.com/$CHECK50_ORG/$CHECK50_REPO.git
+git clone --branch $CHECK50_BRANCH --single-branch "https://$CHECK50_TOKEN:x-oauth-basic@github.com/$CHECK50_ORG/$CHECK50_REPO.git"
 
 # Checkout commit to be tested
 echo "Changing directory to $CHECK50_REPO..."
