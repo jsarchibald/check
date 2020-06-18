@@ -15,7 +15,7 @@ script: |
     -e CHECK50_STYLE=1 \
     -e CHECK50_PRIVATE_KEY=\"/private.pem\", \
     -e CHECK50_CALLBACK_URL=\"http://localhost:8080/validate\" \
-    cs50/check"
+    \"$TRAVIS_REPO_SLUG:$TRAVIS_TAG\""
 
 before_deploy:
 - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
