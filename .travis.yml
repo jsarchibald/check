@@ -5,7 +5,7 @@ branches:
 script: |
   export TRAVIS_TAG=$(( $(git tag --list --sort=version:refname | tail -n1) + 1 ))
   docker build . -t "$TRAVIS_REPO_SLUG:$TRAVIS_TAG"
-  "docker run
+  "docker run \
     -e CHECK50_TOKEN=$CHECK50_TOKEN \
     -e CHECK50_ORG="me50" \
     -e CHECK50_REPO="cs50student2" \
