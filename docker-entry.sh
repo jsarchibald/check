@@ -2,6 +2,75 @@
 
 set -e
 
+# Usage instructions
+usage () {
+    echo "Usage: $0 OPTION..." 
+    echo "-t, --token             TOKEN           your GitHub access token (ideally, set CHECK50_TOKEN as env var instead)"
+    echo "-o, --organization      ORGANIZATION    organization name"
+    echo "-r, --repository        REPOSITORY      repository"
+    echo "-b, --branch            BRANCH          branch within the repository"
+    echo "-c, --commit            COMMIT          commit to check out"
+    echo "-s, --style50           STYLE50         whether to use style50"
+    echo "-k, --key               KEY             private key file path. Assumes private key has no password"
+    echo "-u, --url               URL             callback URL"
+    echo "-h, --help              HELP            display this help message"
+    exit 1
+}
+
+# Get command-line args
+while [ $# -gt 0 ]; do
+    case $1 in
+        -t|--token)
+            shift
+            CHECK50_TOKEN=$1
+            ;;
+        -r|--repository)
+            shift
+            CHECK50_REPO=$1
+            ;;
+        -b|--branch)
+            shift
+            CHECK50_BRANCH=$1
+            CHECK50_SLUG=$1
+            ;;
+        -c|--commit)
+            shift
+            CHECK50_COMMIT=$1
+            ;;
+        -s|--style50)
+            CHECK50_STYLE=1
+            ;;
+        -o|--organization)
+            shift
+            CHECK50_ORG=$1
+            ;;
+        -k|--key)
+            shift
+            CHECK50_PRIVATE_KEY=$(<$1)
+            ;;
+        -u|--url)
+            shift
+            CHECK50_CALLBACK_URL=$1
+            ;;
+        -h|--help)
+            SHOW_HELP=1
+            ;;
+        *)
+            usage
+            ;;
+    esac
+
+    shift
+done
+
+# Show usage message if needed
+if [ "$SHOW_HELP" == "1" ]; then
+    usage
+fi
+
+# Start Flask mock server in background
+python3 /validate/application.py &
+
 # Clone repo
 echo "Cloning $CHECK50_ORG/$CHECK50_REPO@$CHECK50_BRANCH..."
 git clone --branch $CHECK50_BRANCH --single-branch https://$CHECK50_TOKEN:x-oauth-basic@github.com/$CHECK50_ORG/$CHECK50_REPO.git
@@ -91,3 +160,12 @@ SIGNATURE="$(openssl dgst -sha512 -sigopt rsa_padding_mode:pss -sigopt rsa_pss_s
 # Send payload to callback URL
 echo "Sending payload to $CHECK50_CALLBACK_URL..."
 echo -n "$PAYLOAD" | curl --fail --header "Content-Type: application/json" --header "X-Payload-Signature: $SIGNATURE" --data @- "$CHECK50_CALLBACK_URL"
+
+# Save the CURL exit code
+CODE=$?
+
+# Kill and delete Flask server
+fuser -k -TERM -n tcp 8080
+
+# Exit with saved code
+exit $CODE

@@ -23,6 +23,7 @@ RUN pip3 install \
         opencv-python && \
     python3 -m nltk.downloader -d /usr/share/nltk_data/ punkt
 
+# Copy container initialization
 COPY ./docker-entry.sh /
 RUN chmod a+x /docker-entry.sh
 
@@ -39,4 +40,15 @@ RUN git config --global user.name bot50 && \
 
 ENV CHECK50_WORKERS "4"
 
-CMD [ "/docker-entry.sh" ]
+# Copy Travis testing (need to do as root)
+USER root
+COPY validate/ /validate/
+
+# Generate key
+RUN [ "openssl", "genpkey", "-out", "/private.pem", "-outform", "PEM", "--algorithm", "RSA", "-pkeyopt", "rsa_keygen_bits:2048" ]
+RUN [ "openssl", "pkey", "-pubout", "-inform", "PEM", "-outform", "PEM", "-in", "/private.pem", "-out", "/validate/public.pem" ]
+
+USER ubuntu
+
+# Run build test
+RUN [ "/docker-entry.sh", "-o", "me50", "-r", "cs50student2", "-b", "cs50/problems/2020/x/hello", "-c", "e03bee664b4c310579025e494eb086b213c01626", "-s", "-k", "/private.pem", "-u", "http://localhost:8080/validate"]
