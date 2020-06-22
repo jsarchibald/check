@@ -1,5 +1,6 @@
 import json
 import lib50.crypto
+import os
 
 
 def check_payload(payload, expected_payload):
@@ -41,8 +42,8 @@ def valid_signature(sig, payload, public_key="/validate/public.pem"):
     """Determines if a signature is valid"""
 
     # Load the public key
-    with open(public_key, "rb") as f:
-        public_key = lib50.crypto.load_public_key(f.read())
+    key = os.environ["CHECK50_PUBLIC_KEY"]
+    public_key = lib50.crypto.load_public_key(key.encode("utf-8"))
 
     # Encode as bytes if needed
     if type(payload) != bytes:
