@@ -68,7 +68,7 @@ if [ "$SHOW_HELP" == "1" ]; then
     usage
 fi
 
-PRIVATE_KEY = $(mktemp)
+PRIVATE_KEY=$(mktemp)
 echo $CHECK50_PRIVATE_KEY >> PRIVATE_KEY
 
 # openssl genpkey -out $CHECK50_PRIVATE_KEY -outform PEM --algorithm RSA -pkeyopt rsa_keygen_bits:2048
