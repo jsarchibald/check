@@ -73,7 +73,7 @@ echo $CHECK50_PRIVATE_KEY >> PRIVATE_KEY
 
 # openssl genpkey -out $CHECK50_PRIVATE_KEY -outform PEM --algorithm RSA -pkeyopt rsa_keygen_bits:2048
 # chmod +r $CHECK50_PRIVATE_KEY
-openssl pkey -pubout -inform PEM -outform PEM -in PRIVATE_KEY -out /validate/public.pem
+openssl pkey -pubout -inform PEM -outform PEM -in $PRIVATE_KEY -out /validate/public.pem
 
 # Start Flask mock server in background
 python3 /validate/application.py &
