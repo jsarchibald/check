@@ -160,7 +160,7 @@ PAYLOAD="$(jq -c . <<<"$PAYLOAD")"
 echo "Compact payload is $PAYLOAD"
 
 echo "Signing payload..."
-SIGNATURE="$(openssl dgst -sha512 -sigopt rsa_padding_mode:pss -sigopt rsa_pss_saltlen:-2 -sign <(echo -e "$PRIVATE_KEY") <(echo -n "$PAYLOAD") | openssl base64 -A)"
+SIGNATURE="$(openssl dgst -sha512 -sigopt rsa_padding_mode:pss -sigopt rsa_pss_saltlen:-2 -sign "$PRIVATE_KEY" <(echo -n "$PAYLOAD") | openssl base64 -A)"
 
 # Send payload to callback URL
 echo "Sending payload to $CHECK50_CALLBACK_URL..."
