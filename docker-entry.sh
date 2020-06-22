@@ -69,9 +69,9 @@ if [ "$SHOW_HELP" == "1" ]; then
 fi
 
 # Handle signature keys
-PRIVATE_KEY=$(mktemp)
-echo $CHECK50_PRIVATE_KEY >> PRIVATE_KEY
-export CHECK50_PUBLIC_KEY=$(openssl pkey -pubout -inform PEM -outform PEM -in $PRIVATE_KEY)
+CHECK50_PRIVATE_KEY=$(mktemp)
+openssl genpkey -out $CHECK50_PRIVATE_KEY -outform PEM --algorithm RSA -pkeyopt rsa_keygen_bits:2048
+export CHECK50_PUBLIC_KEY=$(openssl pkey -pubout -inform PEM -outform PEM -in $CHECK50_PRIVATE_KEY)
 
 # Start Flask mock server in background
 python3 /validate/application.py &
@@ -160,8 +160,7 @@ PAYLOAD="$(jq -c . <<<"$PAYLOAD")"
 echo "Compact payload is $PAYLOAD"
 
 echo "Signing payload..."
-echo "File: $PRIVATE_KEY"
-SIGNATURE="$(openssl dgst -sha512 -sigopt rsa_padding_mode:pss -sigopt rsa_pss_saltlen:-2 -sign "$CHECK50_PRIVATE_KEY" <(echo -n "$PAYLOAD") | openssl base64 -A)"
+SIGNATURE="$(openssl dgst -sha512 -sigopt rsa_padding_mode:pss -sigopt rsa_pss_saltlen:-2 -sign <(echo -e "$CHECK50_PRIVATE_KEY") <(echo -n "$PAYLOAD") | openssl base64 -A)"
 
 # Send payload to callback URL
 echo "Sending payload to $CHECK50_CALLBACK_URL..."
