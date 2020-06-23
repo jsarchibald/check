@@ -12,13 +12,14 @@ install:
   - pip install Flask lib50
   - docker build . -t "$TRAVIS_REPO_SLUG:$TRAVIS_TAG"
 script: |
-  mkdir -p tests/keys
-  openssl genpkey -out tests/keys/private.pem -outform PEM -algorithm RSA -pkeyopt rsa_keygen_bits:2048
-  openssl pkey -pubout -inform PEM -outform PEM -in tests/keys/private.pem -out tests/keys/public.pem
+  export KEYS_DIR="$PWD/tests/keys/"
+  mkdir -p $KEYS_DIR
+  openssl genpkey -out "$KEYS_DIR"private.pem -outform PEM -algorithm RSA -pkeyopt rsa_keygen_bits:2048
+  openssl pkey -pubout -inform PEM -outform PEM -in "$KEYS_DIR"private.pem -out "$KEYS_DIR"public.pem
   export HOST_IP="$(ip route show | awk '/docker0/ {print $NF}')"
   cd validate && flask run -h 0.0.0.0 & cd ..
-  export KEYS_DIR="$PWD/tests/keys"
-  docker run --network host -v $KEYS_DIR:/keys "$TRAVIS_REPO_SLUG:$TRAVIS_TAG" /docker-entry.sh -t $CHECK50_TOKEN -o $CHECK50_ORG -r $CHECK50_REPO -b $CHECK50_BRANCH -c $CHECK50_COMMIT -cb "http://$HOST_IP:5000/validate" -s
+  
+  docker run --network host -v $KEYS_DIR:/keys/ "$TRAVIS_REPO_SLUG:$TRAVIS_TAG" /docker-entry.sh -t $CHECK50_TOKEN -o $CHECK50_ORG -r $CHECK50_REPO -b $CHECK50_BRANCH -c $CHECK50_COMMIT -cb "http://$HOST_IP:5000/validate" -s
 before_deploy:
 - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 - docker tag "$TRAVIS_REPO_SLUG:$TRAVIS_TAG" "$TRAVIS_REPO_SLUG:latest"
