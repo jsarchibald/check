@@ -30,7 +30,6 @@ while [ $# -gt 0 ]; do
         -b|--branch)
             shift
             BRANCH="$1"
-            SLUG="$1"
             ;;
         -c|--commit)
             shift
@@ -110,14 +109,14 @@ fi
 CHECK50_OUT=$(mktemp)
 echo -n "null" > $CHECK50_OUT
 
-if [ -n "$SLUG" ]; then
-    echo "Cloning checks at $SLUG..."
-    python3 -c "import lib50, os, sys; lib50.set_local_path(os.getenv('CHECK50_PATH')); lib50.local(sys.argv[1], github_token=sys.argv[2], remove_origin=True)" "$SLUG" "$TOKEN"
+if [ -n "$BRANCH" ]; then
+    echo "Cloning checks at $BRANCH..."
+    python3 -c "import lib50, os, sys; lib50.set_local_path(os.getenv('CHECK50_PATH')); lib50.local(sys.argv[1], github_token=sys.argv[2], remove_origin=True)" "$BRANCH" "$TOKEN"
 
     echo "Running check50..."
-    sandbox "check50 --local --no-download-checks --verbose --output=json --output-file='$CHECK50_OUT' '$SLUG'" || true
+    sandbox "check50 --local --no-download-checks --verbose --output=json --output-file='$CHECK50_OUT' '$BRANCH'" || true
 else
-    echo "SLUG is $SLUG. Skipping check50..."
+    echo "SLUG is $BRANCH. Skipping check50..."
 fi
 
 CHECK50_RESULT=$(cat $CHECK50_OUT)

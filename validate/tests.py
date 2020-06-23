@@ -1,6 +1,5 @@
 import json
 import lib50.crypto
-import os
 
 
 def check_payload(payload, expected_payload):
