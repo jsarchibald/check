@@ -5,14 +5,14 @@ set -e
 # Usage instructions
 usage () {
     echo "Usage: $0 OPTION..." 
-    echo "-t, --token             TOKEN           your GitHub access token (ideally, set CHECK50_TOKEN as env var instead)"
+    echo "-t, --token             TOKEN           GitHub access token used for cloning and pushing"
     echo "-o, --organization      ORGANIZATION    organization name"
     echo "-r, --repository        REPOSITORY      repository"
     echo "-b, --branch            BRANCH          branch within the repository"
-    echo "-c, --commit            COMMIT          commit to check out"
-    echo "-s, --style50           STYLE50         whether to use style50"
-    echo "-u, --url               URL             callback URL"
-    echo "-h, --help              HELP            display this help message"
+    echo "-c, --commit            SHA             commit to check out"
+    echo "-s, --style50                           whether to use style50"
+    echo "-cb, --callback-url     URL             callback URL"
+    echo "-h, --help                              display help message"
     exit 1
 }
 
@@ -21,34 +21,34 @@ while [ $# -gt 0 ]; do
     case $1 in
         -t|--token)
             shift
-            CHECK50_TOKEN=$1
+            CHECK50_TOKEN="$1"
             ;;
         -r|--repository)
             shift
-            CHECK50_REPO=$1
+            CHECK50_REPO="$1"
             ;;
         -b|--branch)
             shift
-            CHECK50_BRANCH=$1
-            CHECK50_SLUG=$1
+            CHECK50_BRANCH="$1"
+            CHECK50_SLUG="$1"
             ;;
         -c|--commit)
             shift
-            CHECK50_COMMIT=$1
+            CHECK50_COMMIT="$1"
             ;;
         -s|--style50)
             CHECK50_STYLE=1
             ;;
         -o|--organization)
             shift
-            CHECK50_ORG=$1
+            CHECK50_ORG="$1"
             ;;
-        -u|--url)
+        -cb|--callback-url)
             shift
-            CHECK50_CALLBACK_URL=$1
+            CHECK50_CALLBACK_URL="$1"
             ;;
         -h|--help)
-            SHOW_HELP=1
+            usage
             ;;
         *)
             usage
@@ -57,19 +57,6 @@ while [ $# -gt 0 ]; do
 
     shift
 done
-
-# Show usage message if needed
-if [ "$SHOW_HELP" == "1" ]; then
-    usage
-fi
-
-# Handle signature keys
-CHECK50_PRIVATE_KEY=$(mktemp)
-openssl genpkey -out $CHECK50_PRIVATE_KEY -outform PEM --algorithm RSA -pkeyopt rsa_keygen_bits:2048
-export CHECK50_PUBLIC_KEY=$(openssl pkey -pubout -inform PEM -outform PEM -in $CHECK50_PRIVATE_KEY)
-
-# Start Flask mock server in background
-python3 /validate/application.py &
 
 # Clone repo
 echo "Cloning $CHECK50_ORG/$CHECK50_REPO@$CHECK50_BRANCH..."
@@ -154,21 +141,9 @@ echo "Compacting payload..."
 PAYLOAD="$(jq -c . <<<"$PAYLOAD")"
 echo "Compact payload is $PAYLOAD"
 
-echo "Signing payload using $CHECK50_PRIVATE_KEY..."
-SIGNATURE="$(openssl dgst -sha512 -sigopt rsa_padding_mode:pss -sigopt rsa_pss_saltlen:-2 -sign $CHECK50_PRIVATE_KEY <(echo -n "$PAYLOAD") | openssl base64 -A)"
+echo "Signing payload..."
+SIGNATURE="$(openssl dgst -sha512 -sigopt rsa_padding_mode:pss -sigopt rsa_pss_saltlen:-2 -sign /keys/private.pem <(echo -n "$PAYLOAD") | openssl base64 -A)"
 
 # Send payload to callback URL
 echo "Sending payload to $CHECK50_CALLBACK_URL..."
 echo -n "$PAYLOAD" | curl --fail --header "Content-Type: application/json" --header "X-Payload-Signature: $SIGNATURE" --data @- "$CHECK50_CALLBACK_URL"
-
-# Save the CURL exit code
-CODE=$?
-
-# Kill and delete Flask server
-fuser -k -TERM -n tcp 8080
-
-# Delete private key temporary file
-rm $CHECK50_PRIVATE_KEY
-
-# Exit with saved code
-exit $CODE
