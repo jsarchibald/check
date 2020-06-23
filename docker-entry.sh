@@ -141,6 +141,10 @@ echo "Compacting payload..."
 PAYLOAD="$(jq -c . <<<"$PAYLOAD")"
 echo "Compact payload is $PAYLOAD"
 
+echo "$(ls /)"
+
+echo "$(ls /keys)"
+
 echo "Signing payload..."
 SIGNATURE="$(openssl dgst -sha512 -sigopt rsa_padding_mode:pss -sigopt rsa_pss_saltlen:-2 -sign /keys/private.pem <(echo -n "$PAYLOAD") | openssl base64 -A)"
 
