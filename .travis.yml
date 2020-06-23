@@ -7,7 +7,7 @@ env:
 language: python
 python: 3.6
 install:
-  pip install Flask
+  pip install Flask lib50
 script: |
   export TRAVIS_TAG=$(( $(git tag --list --sort=version:refname | tail -n1) + 1 ))
   docker build . -t "$TRAVIS_REPO_SLUG:$TRAVIS_TAG"
