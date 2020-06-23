@@ -19,7 +19,7 @@ script: |
   export HOST_IP="$(ip route show | awk '/docker0/ {print $NF}')"
   cd validate && flask run -h 0.0.0.0 & cd ..
   
-  docker run --network host -v $KEYS_DIR:/keys/ "$TRAVIS_REPO_SLUG:$TRAVIS_TAG" /docker-entry.sh -t $CHECK50_TOKEN -o $CHECK50_ORG -r $CHECK50_REPO -b $CHECK50_BRANCH -c $CHECK50_COMMIT -cb "http://$HOST_IP:5000/validate" -s
+  docker run --network host -v $KEYS_DIR:/keys/ "$TRAVIS_REPO_SLUG:$TRAVIS_TAG" /docker-entry.sh -t $CHECK50_TOKEN -o $CHECK50_ORG -r $CHECK50_REPO -b $CHECK50_BRANCH -c $CHECK50_COMMIT -cb "http://localhost:5000/validate" -s
 before_deploy:
 - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 - docker tag "$TRAVIS_REPO_SLUG:$TRAVIS_TAG" "$TRAVIS_REPO_SLUG:latest"
